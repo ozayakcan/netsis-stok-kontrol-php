@@ -39,7 +39,7 @@ class Stok_Model extends CI_Model
     public $stharGCMIK = "STHAR_GCMIK";
     public $stharAciklama = "STHAR_ACIKLAMA";
 
-    public function stoklar($sira = 0, $ogeSayisi = 0, $ara = "")
+    public function stoklar($stokKod, $sira = 0, $ogeSayisi = 0, $ara = "")
     {
         $query = $this->db->reset_query();
         $query->select($this->tblStok . "." . $this->stokKodu . "," . $this->tblStok . "." . $this->stokAdi . "," . $this->tblStok . "." . $this->alisFiat1 . "," . $this->tblStok . "." . $this->alisFiat2 . "," . $this->tblStok . "." . $this->alisFiat3 . "," . $this->tblStok . "." . $this->alisFiat4 . "," . $this->tblStok . "." . $this->satisFiat1 . "," . $this->tblStok . "." . $this->satisFiat2 . "," . $this->tblStok . "." . $this->satisFiat3 . "," . $this->tblStok . "." . $this->satisFiat4 . "," . $this->tblStok . "." . $this->kdvOrani . "," . $this->tblStok . "." . $this->olcuBr1 . "," . $this->tblStok . "." . $this->olcuBr2 . "," . $this->tblStok . "." . $this->olcuBr3 . "," . $this->tblStokEk . "." . $this->kayitTarihi)->from($this->tblStok);
@@ -48,6 +48,9 @@ class Stok_Model extends CI_Model
             $ara = $this->Donusturucu_Model->turkceKarakterArama($ara);
             $query->like($this->tblStok . "." . $this->stokKodu, $ara)->or_like($this->tblStok . "." . $this->stokAdi, $ara);
         }
+        if(strlen($stokKod) > 0){
+            $query->where($this->tblStok.".".$this->stokKodu, $this->Donusturucu_Model->turkceKarakterArama($stokKod));
+        }
         $query->join($this->tblStokEk, $this->tblStok . "." . $this->stokKodu . " = " . $this->tblStokEk . "." . $this->stokKodu);
         $query->order_by($this->tblStokEk . "." . $this->kayitTarihi, "DESC");
         if ($ogeSayisi > 0) {
@@ -55,7 +58,7 @@ class Stok_Model extends CI_Model
         }
         return $query->get();
     }
-    public function stok_donustur($stoklar)
+    public function stok_donustur($stoklar, $hareketleri_goster = TRUE)
     {
         $stoklar = $stoklar->result_array();
         for ($i = 0; $i < count($stoklar); $i++) {
@@ -131,16 +134,20 @@ class Stok_Model extends CI_Model
                 $olcuBrimi .= $stoklar[$i][$this->olcuBr3];
                 $olcuBrSayisi++;
             }
-            $stoklar[$i] = array(
+            $yeniStoklar = array(
                 $this->Donusturucu_Model->turkceKarakter($stoklar[$i][$this->stokKodu]),
                 $this->Donusturucu_Model->turkceKarakter($stoklar[$i][$this->stokAdi]),
                 $alisFiyati,
                 $satisFiyati,
                 $this->Donusturucu_Model->decimal($stoklar[$i][$this->kdvOrani]),
                 $olcuBrimi,
-                substr($stoklar[$i][$this->kayitTarihi], 0, 10),
-                '<a href="' . base_url("stok/hareket/" . $this->Donusturucu_Model->turkceKarakter($stoklar[$i][$this->stokKodu])) . '" class="btn btn-primary">Hareketler</a>',
+                substr($stoklar[$i][$this->kayitTarihi], 0, 10)
             );
+            if($hareketleri_goster){
+                array_push($yeniStoklar, 
+                '<a href="' . base_url("stok/hareket/" . $this->Donusturucu_Model->turkceKarakter($stoklar[$i][$this->stokKodu])) . '" class="btn btn-primary">Hareketler</a>');
+            }
+            $stoklar[$i] = $yeniStoklar;
         }
         return $stoklar;
     }

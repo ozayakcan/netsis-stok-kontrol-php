@@ -15,6 +15,19 @@ $baslik = $kod . ' Stok Hareketleri';
 <?php
 $this->load->view("inc/nav", array("baslik" => $baslik, "geri" => true));
 ?>
+<table id="stok-tablo" class="table display responsive nowrap">
+  <thead>
+    <tr>
+      <th scope="col">STOK KODU</th>
+      <th scope="col">STOK ADI</th>
+      <th scope="col">ALIŞ FİYATLARI</th>
+      <th scope="col">SATIŞ FİYATLARI</th>
+      <th scope="col">KDV (%)</th>
+      <th scope="col">ÖLÇÜ BİRİMLERİ</th>
+      <th scope="col">KAYIT TARİHİ</th>
+    </tr>
+  </thead>
+</table>
 <table id="stok-hareket-tablo" class="table display responsive nowrap">
   <thead>
     <tr>
@@ -33,6 +46,24 @@ $this->load->view("inc/scripts/default");
 ?>
 <script>
 $(document).ready(function(){
+    $('#stok-tablo').DataTable({
+      "searching": false,
+      "ordering": false,
+      "order": [[6, 'desc']],
+      "processing": true,
+      "serverSide": true,
+      "ajax": {
+          url: '<?=base_url("stok/json");?>',
+          type: 'POST',
+          data: {
+            '<?=$this->Stok_Model->stokKodu;?>': '<?=$kod;?>'
+          }
+      },
+      "responsive": true,
+      "autoWidth": false,
+      "dom": 't',
+      "pageLength": 50
+    });
     $('#stok-hareket-tablo').DataTable({
       "searching": true,
       "ordering": false,

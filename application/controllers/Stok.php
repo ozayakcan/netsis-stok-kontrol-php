@@ -15,6 +15,10 @@ class Stok extends CI_Controller
     }
     public function json()
     {
+        $stokKod = $this->input->post($this->Stok_Model->stokKodu);
+        if(!isset($stokKod)){
+            $stokKod = "";
+        }
         $draw = $this->input->post("draw");
         $start = $this->input->post("start");
         $length = $this->input->post("length");
@@ -30,14 +34,14 @@ class Stok extends CI_Controller
         }
         $order = $this->input->post("order");
         $columns = $this->input->post("columns");
-        $stoklar = $this->Stok_Model->stoklar($start, $length, $search);
-        $filtreliStokSayisi = $this->Stok_Model->stoklar(0, 0, $search)->num_rows();
-        $stokSayisi = $this->Stok_Model->stoklar()->num_rows();
+        $stoklar = $this->Stok_Model->stoklar($stokKod, $start, $length, $search);
+        $filtreliStokSayisi = $this->Stok_Model->stoklar($stokKod, 0, 0, $search)->num_rows();
+        $stokSayisi = $this->Stok_Model->stoklar($stokKod)->num_rows();
         $result = array();
         $result["draw"] = $draw;
         $result["recordsTotal"] = $stokSayisi;
         $result["recordsFiltered"] = $filtreliStokSayisi;
-        $result["data"] = $this->Stok_Model->stok_donustur($stoklar);
+        $result["data"] = $this->Stok_Model->stok_donustur($stoklar, !(strlen($stokKod) > 0));
         echo json_encode($result);
     }
     public function hareket($kod = "")
