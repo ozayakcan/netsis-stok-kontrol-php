@@ -157,6 +157,11 @@ class Stok_Model extends CI_Model
         $query->select($this->stHarTarih . "," . $this->fisNo . "," . $this->stHarNF . "," . $this->stharGcKod . "," . $this->stharGCMIK . "," . $this->stharAciklama);
         $query->where($this->stokKodu, $this->Donusturucu_Model->turkceKarakterArama($kod));
         $query->order_by($this->stHarTarih, "DESC");
+        
+        if (strlen($ara) > 0) {
+            $ara = $this->Donusturucu_Model->turkceKarakterArama($ara);
+            $query->like($this->stharAciklama, $ara);
+        }
         if ($ogeSayisi > 0) {
             $query->limit($ogeSayisi, $sira);
         }
@@ -179,7 +184,7 @@ class Stok_Model extends CI_Model
                 $stok_hareket[$i][$this->stharGcKod] == $this->stokHarGiris ? $stok_hareket[$i][$this->stharGCMIK] : "",
                 $stok_hareket[$i][$this->stharGcKod] == $this->stokHarCikis ? $stok_hareket[$i][$this->stharGCMIK] : "",
                 $this->Donusturucu_Model->decimal($bakiye),
-                $stok_hareket[$i][$this->stharAciklama],
+                $this->Donusturucu_Model->turkceKarakter($stok_hareket[$i][$this->stharAciklama]),
             );
         }
         return $stok_hareket;
