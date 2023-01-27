@@ -39,6 +39,11 @@ class Stok_Model extends CI_Model
     public $stharGCMIK = "STHAR_GCMIK";
     public $stharAciklama = "STHAR_ACIKLAMA";
 
+    // Müşteri
+    public $tblCaSabit = "TBLCASABIT";
+    public $tblCariKod = "CARI_KOD";
+    public $tblCariIsim = "CARI_ISIM";
+
     public function stoklar($stokKod, $sira = 0, $ogeSayisi = 0, $ara = "")
     {
         $query = $this->db->reset_query();
@@ -48,8 +53,8 @@ class Stok_Model extends CI_Model
             $ara = $this->Donusturucu_Model->turkceKarakterArama($ara);
             $query->like($this->tblStok . "." . $this->stokKodu, $ara)->or_like($this->tblStok . "." . $this->stokAdi, $ara);
         }
-        if(strlen($stokKod) > 0){
-            $query->where($this->tblStok.".".$this->stokKodu, $this->Donusturucu_Model->turkceKarakterArama($stokKod));
+        if (strlen($stokKod) > 0) {
+            $query->where($this->tblStok . "." . $this->stokKodu, $this->Donusturucu_Model->turkceKarakterArama($stokKod));
         }
         $query->join($this->tblStokEk, $this->tblStok . "." . $this->stokKodu . " = " . $this->tblStokEk . "." . $this->stokKodu);
         $query->order_by($this->tblStokEk . "." . $this->kayitTarihi, "DESC");
@@ -58,7 +63,7 @@ class Stok_Model extends CI_Model
         }
         return $query->get();
     }
-    public function stok_donustur($stoklar, $hareketleri_goster = TRUE)
+    public function stok_donustur($stoklar, $hareketleri_goster = true)
     {
         $stoklar = $stoklar->result_array();
         for ($i = 0; $i < count($stoklar); $i++) {
@@ -141,11 +146,11 @@ class Stok_Model extends CI_Model
                 $satisFiyati,
                 $this->Donusturucu_Model->decimal($stoklar[$i][$this->kdvOrani]),
                 $olcuBrimi,
-                substr($stoklar[$i][$this->kayitTarihi], 0, 10)
+                substr($stoklar[$i][$this->kayitTarihi], 0, 10),
             );
-            if($hareketleri_goster){
-                array_push($yeniStoklar, 
-                '<a href="' . base_url("stok/hareket/" . $this->Donusturucu_Model->turkceKarakter($stoklar[$i][$this->stokKodu])) . '" class="btn btn-primary">Hareketler</a>');
+            if ($hareketleri_goster) {
+                array_push($yeniStoklar,
+                    '<a href="' . base_url("stok/hareket/" . $this->Donusturucu_Model->turkceKarakter($stoklar[$i][$this->stokKodu])) . '" class="btn btn-primary">Hareketler</a>');
             }
             $stoklar[$i] = $yeniStoklar;
         }
@@ -154,18 +159,19 @@ class Stok_Model extends CI_Model
     public function stok_hareket($kod, $sira = 0, $ogeSayisi = 0, $ara = "")
     {
         $query = $this->db->reset_query();
-        $query->select($this->stHarTarih . "," . $this->fisNo . "," . $this->stHarNF . "," . $this->stharGcKod . "," . $this->stharGCMIK . "," . $this->stharAciklama);
-        $query->where($this->stokKodu, $this->Donusturucu_Model->turkceKarakterArama($kod));
-        $query->order_by($this->stHarTarih, "DESC");
-        
+        $query->select($this->tblStHar . "." . $this->stHarTarih . "," . $this->tblStHar . "." . $this->fisNo . "," . $this->tblStHar . "." . $this->stHarNF . "," . $this->tblStHar . "." . $this->stharGcKod . "," . $this->tblStHar . "." . $this->stharGCMIK . "," . $this->tblStHar . "." . $this->stharAciklama.",".$this->tblCaSabit . "." . $this->tblCariKod.",".$this->tblCaSabit . "." . $this->tblCariIsim)->from($this->tblStHar);
+        $query->join($this->tblCaSabit, $this->tblStHar . "." . $this->stharAciklama . " = " . $this->tblCaSabit . "." . $this->tblCariKod);
+        $query->where($this->tblStHar . "." . $this->stokKodu, $this->Donusturucu_Model->turkceKarakterArama($kod));
+        $query->order_by($this->tblStHar . "." . $this->stHarTarih, "DESC");
+
         if (strlen($ara) > 0) {
             $ara = $this->Donusturucu_Model->turkceKarakterArama($ara);
-            $query->like($this->stharAciklama, $ara);
+            $query->like($this->tblStHar.".".$this->stharAciklama, $ara);
         }
         if ($ogeSayisi > 0) {
             $query->limit($ogeSayisi, $sira);
         }
-        return $query->get($this->tblStHar);
+        return $query->get();
     }
     public function stok_hareket_donustur($stok_hareket)
     {
@@ -184,7 +190,7 @@ class Stok_Model extends CI_Model
                 $stok_hareket[$i][$this->stharGcKod] == $this->stokHarGiris ? $stok_hareket[$i][$this->stharGCMIK] : "",
                 $stok_hareket[$i][$this->stharGcKod] == $this->stokHarCikis ? $stok_hareket[$i][$this->stharGCMIK] : "",
                 $this->Donusturucu_Model->decimal($bakiye),
-                $this->Donusturucu_Model->turkceKarakter($stok_hareket[$i][$this->stharAciklama]),
+                $this->Donusturucu_Model->turkceKarakter(isset($stok_hareket[$i][$this->tblCariIsim]) ? $stok_hareket[$i][$this->tblCariIsim] : $stok_hareket[$i][$this->stharAciklama]),
             );
         }
         return $stok_hareket;
