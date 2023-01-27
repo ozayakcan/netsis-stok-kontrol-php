@@ -46,6 +46,7 @@ $this->load->view("inc/scripts/default");
 ?>
 <script>
 $(document).ready(function(){
+    $.fn.dataTable.ext.errMode = 'none';
     $('#stok-tablo').DataTable({
       "searching": false,
       "ordering": false,
