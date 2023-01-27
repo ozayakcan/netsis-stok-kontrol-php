@@ -48,37 +48,43 @@ $this->load->view("inc/scripts/default");
 $(document).ready(function(){
     $.fn.dataTable.ext.errMode = 'none';
     $('#stok-tablo').DataTable({
-      "searching": false,
-      "ordering": false,
-      "order": [[6, 'desc']],
-      "processing": true,
-      "serverSide": true,
-      "ajax": {
-          url: '<?=base_url("stok/json");?>',
-          type: 'POST',
-          data: {
-            '<?=$this->Stok_Model->stokKodu;?>': '<?=$kod;?>'
-          }
-      },
-      "responsive": true,
-      "autoWidth": false,
-      "dom": 't',
-      "pageLength": 50
+        "searching": false,
+        "ordering": false,
+        "order": [[6, 'desc']],
+        "processing": true,
+        "serverSide": true,
+        "ajax": {
+            url: '<?=base_url("stok/json");?>',
+            type: 'POST',
+            data: {
+                '<?=$this->Stok_Model->stokKodu;?>': '<?=$kod;?>'
+            }
+        },
+        "responsive": true,
+        "autoWidth": false,
+        "dom": 't',
+        "pageLength": 50,
+        "language": {
+            url: "<?=base_url("assets/json/datatables-stok-tr.json");?>"
+        }
     });
     $('#stok-hareket-tablo').DataTable({
-      "searching": true,
-      "ordering": false,
-      "order": [[6, 'desc']],
-      "processing": true,
-      "serverSide": true,
-      "ajax": {
-          url: '<?=base_url("stok/hareket_json/".$kod);?>',
-          type: 'POST'
-      },
-      "responsive": true,
-      "autoWidth": false,
-      "dom": 'ftipr',
-      "pageLength": 50
+        "searching": true,
+        "ordering": false,
+        "order": [[6, 'desc']],
+        "processing": true,
+        "serverSide": true,
+        "ajax": {
+            url: '<?=base_url("stok/hareket_json/" . $kod);?>',
+            type: 'POST'
+        },
+        "responsive": true,
+        "autoWidth": false,
+        "dom": 'ftipr',
+        "pageLength": 50,
+        "language": {
+            url: "<?=base_url("assets/json/datatables-stok-hareket-tr.json");?>"
+        }
     });
 });
 </script>

@@ -49,7 +49,10 @@ $(document).ready(function(){
       "responsive": true,
       "autoWidth": false,
       "dom": 'ftipr',
-      "pageLength": 50
+      "pageLength": 50,
+      "language": {
+          url: "<?=base_url("assets/json/datatables-stok-tr.json");?>"
+      }
     });
 });
 </script>
