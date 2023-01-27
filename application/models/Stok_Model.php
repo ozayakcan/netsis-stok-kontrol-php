@@ -28,18 +28,29 @@ class Stok_Model extends CI_Model
     public $tblStokEk = "TBLSTSABITEK";
     public $kayitTarihi = "KAYITTARIHI";
 
+    // Hareketler
+    public $tblStHar = "TBLSTHAR";
+    public $stHarTarih = "STHAR_TARIH";
+    public $fisNo = "FISNO";
+    public $stHarNF = "STHAR_NF";
+    public $stharGcKod = "STHAR_GCKOD";
+    public $stokHarGiris = "G";
+    public $stokHarCikis = "C";
+    public $stharGCMIK = "STHAR_GCMIK";
+    public $stharAciklama = "STHAR_ACIKLAMA";
+
     public function stoklar($sira = 0, $ogeSayisi = 0, $ara = "")
     {
         $query = $this->db->reset_query();
         $query->select($this->tblStok . "." . $this->stokKodu . "," . $this->tblStok . "." . $this->stokAdi . "," . $this->tblStok . "." . $this->alisFiat1 . "," . $this->tblStok . "." . $this->alisFiat2 . "," . $this->tblStok . "." . $this->alisFiat3 . "," . $this->tblStok . "." . $this->alisFiat4 . "," . $this->tblStok . "." . $this->satisFiat1 . "," . $this->tblStok . "." . $this->satisFiat2 . "," . $this->tblStok . "." . $this->satisFiat3 . "," . $this->tblStok . "." . $this->satisFiat4 . "," . $this->tblStok . "." . $this->kdvOrani . "," . $this->tblStok . "." . $this->olcuBr1 . "," . $this->tblStok . "." . $this->olcuBr2 . "," . $this->tblStok . "." . $this->olcuBr3 . "," . $this->tblStokEk . "." . $this->kayitTarihi)->from($this->tblStok);
-        
-        if(strlen($ara) > 0){
+
+        if (strlen($ara) > 0) {
             $ara = $this->Donusturucu_Model->turkceKarakterArama($ara);
             $query->like($this->tblStok . "." . $this->stokKodu, $ara)->or_like($this->tblStok . "." . $this->stokAdi, $ara);
         }
         $query->join($this->tblStokEk, $this->tblStok . "." . $this->stokKodu . " = " . $this->tblStokEk . "." . $this->stokKodu);
         $query->order_by($this->tblStokEk . "." . $this->kayitTarihi, "DESC");
-        if($ogeSayisi > 0){
+        if ($ogeSayisi > 0) {
             $query->limit($ogeSayisi, $sira);
         }
         return $query->get();
@@ -128,9 +139,42 @@ class Stok_Model extends CI_Model
                 $this->Donusturucu_Model->decimal($stoklar[$i][$this->kdvOrani]),
                 $olcuBrimi,
                 substr($stoklar[$i][$this->kayitTarihi], 0, 10),
-                '<a href="'.base_url("stok/hareket/" . $this->Donusturucu_Model->turkceKarakter($stoklar[$i][$this->stokKodu])).'" class="btn btn-primary">Hareketler</a>'
+                '<a href="' . base_url("stok/hareket/" . $this->Donusturucu_Model->turkceKarakter($stoklar[$i][$this->stokKodu])) . '" class="btn btn-primary">Hareketler</a>',
             );
         }
         return $stoklar;
+    }
+    public function stok_hareket($kod, $sira = 0, $ogeSayisi = 0, $ara = "")
+    {
+        $query = $this->db->reset_query();
+        $query->select($this->stHarTarih . "," . $this->fisNo . "," . $this->stHarNF . "," . $this->stharGcKod . "," . $this->stharGCMIK . "," . $this->stharAciklama);
+        $query->where($this->stokKodu, $this->Donusturucu_Model->turkceKarakterArama($kod));
+        $query->order_by($this->stHarTarih, "DESC");
+        if ($ogeSayisi > 0) {
+            $query->limit($ogeSayisi, $sira);
+        }
+        return $query->get($this->tblStHar);
+    }
+    public function stok_hareket_donustur($stok_hareket)
+    {
+        $stok_hareket = $stok_hareket->result_array();
+        $bakiye = 0;
+        for ($i = count($stok_hareket) - 1; $i >= 0; $i--) {
+            if ($stok_hareket[$i][$this->stharGcKod] == $this->stokHarGiris) {
+                $bakiye += $stok_hareket[$i][$this->stharGCMIK];
+            } else if ($stok_hareket[$i][$this->stharGcKod] == $this->stokHarCikis) {
+                $bakiye -= $stok_hareket[$i][$this->stharGCMIK];
+            }
+            $stok_hareket[$i] = array(
+                substr($stok_hareket[$i][$this->stHarTarih], 0, 10),
+                $stok_hareket[$i][$this->fisNo],
+                $stok_hareket[$i][$this->stHarNF],
+                $stok_hareket[$i][$this->stharGcKod] == $this->stokHarGiris ? $stok_hareket[$i][$this->stharGCMIK] : "",
+                $stok_hareket[$i][$this->stharGcKod] == $this->stokHarCikis ? $stok_hareket[$i][$this->stharGCMIK] : "",
+                $this->Donusturucu_Model->decimal($bakiye),
+                $stok_hareket[$i][$this->stharAciklama],
+            );
+        }
+        return $stok_hareket;
     }
 }
