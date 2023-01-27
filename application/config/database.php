@@ -75,10 +75,10 @@ $query_builder = TRUE;
 
 $db['default'] = array(
 	'dsn'	=> '',
-	'hostname' => "localhost,1433",
-	'username' => "sa",
-	'password' => "1212",
-	'database' => "ADS2016",
+	'hostname' => 'localhost,'.getenv('port'),
+	'username' => getenv('kullanici_adi'),
+	'password' => getenv('sifre'),
+	'database' => getenv('veritabani'),
 	'dbdriver' => "sqlsrv",
 	'dbprefix' => '',
 	'pconnect' => FALSE,
